@@ -1,5 +1,6 @@
 # app/main.py
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.schema.item_model import Item
 from app.schema.item_model import Base  # Import Base from schema
 from app.database import engine
@@ -12,6 +13,15 @@ app = FastAPI(
     title="BeeFair REST API",
     description="BeeFair Fair Testing Tool REST API",
     version="1.0.0",
+)
+
+# CORS related configuration 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000"], # Frontend url:port
+    allow_credentials=True,
+    allow_methods=["*"],  
+    allow_headers=["*"],
 )
 
 # Router'ları ekle
