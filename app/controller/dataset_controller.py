@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
 from app.database import SessionLocal
-from app.model.dataset import DatasetInfo
+from app.model.dataset import DatasetInfo, DatasetSelectionRequest
 
 router = APIRouter(
     prefix="/dataset",
@@ -36,3 +36,15 @@ def get_datasets(db: Session = Depends(get_db)):
         )
     ]
     return datasets
+
+@router.post("/", response_model=List[str])
+def receive_selected_datasets(selection: DatasetSelectionRequest, db: Session = Depends(get_db)):
+    
+    # todo: business logic
+    print(selection)
+    response = ["test"]
+    
+    if not response:
+        raise HTTPException(status_code=404, detail="No datasets found")
+    
+    return response
