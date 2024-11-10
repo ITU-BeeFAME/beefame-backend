@@ -4,7 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.schema.item_model import Item
 from app.schema.item_model import Base  # Import Base from schema
 from app.database import engine
-from app.controller import item_controller, dataset_controller
+from app.controller import item_controller, dataset_controller, method_controller, classifier_controller
 
 # Veritabanı tablolarını oluştur
 Base.metadata.create_all(bind=engine)
@@ -27,3 +27,5 @@ app.add_middleware(
 # Router'ları ekle
 app.include_router(item_controller.router)
 app.include_router(dataset_controller.router)
+app.include_router(method_controller.router)
+app.include_router(classifier_controller.router)
