@@ -3,7 +3,7 @@
 from pydantic import BaseModel, HttpUrl
 
 class MethodInfo(BaseModel):
-    Name: str
-    Type: str
-    Url: HttpUrl
-    Description: str
+    name: str
+    type: str
+    url: HttpUrl
+    description: str
