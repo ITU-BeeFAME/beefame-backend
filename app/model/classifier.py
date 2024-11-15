@@ -3,5 +3,5 @@
 from pydantic import BaseModel, HttpUrl
 
 class ClassifierInfo(BaseModel):
-    Name: str
-    Url: HttpUrl
+    name: str
+    url: HttpUrl

@@ -1,4 +1,6 @@
 # app/controller/item_controller.py
+from app.model.response import SuccessResponse
+from app.service.method_service import MethodService
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from typing import List
@@ -6,8 +8,8 @@ from app.database import SessionLocal
 from app.model.method import MethodInfo
 
 router = APIRouter(
-    prefix="/method",
-    tags=["methods"],
+    prefix="/methods",
+    tags=["Methods"],
 )
 
 # Dependency
@@ -18,26 +20,8 @@ def get_db():
     finally:
         db.close()
 
-@router.get("/", response_model=List[MethodInfo])
+@router.get("/", response_model=SuccessResponse)
 def get_methods(db: Session = Depends(get_db)):
-    methods = [
-        MethodInfo(
-            Name="Data Repaierer",
-            Type="Preprocessing",
-            Url="https://github.com/dssg/aequitas/blob/master/src/aequitas/flow/methods/preprocessing/data_repairer.py",
-            Description="Transforms the data distribution so that a given feature distribution is marginally independent of the sensitive attribute, s."
-        ),
-        MethodInfo(
-            Name="Prevalence Sampling",
-            Type="Preprocessing",
-            Url="https://github.com/dssg/aequitas/blob/master/src/aequitas/flow/methods/preprocessing/prevalence_sample.py",
-            Description="Predict whether income exceeds $50K/yr based on census data. Also known as Adult dataset."
-        ),
-        MethodInfo(
-            Name="Relabeller",
-            Type="Preprocessing",
-            Url="https://github.com/cosmicBboy/themis-ml/blob/master/themis_ml/preprocessing/relabelling.py",
-            Description="Relabels target variables using a function that can compute a decision boundary in input data space using heuristic."
-        )
-    ]
-    return methods
+    service = MethodService()
+    methods = service.get_methods()
+    return SuccessResponse(data=methods)
