@@ -20,7 +20,6 @@ def get_db():
 
 @router.get("/", response_model=List[DatasetInfo])
 def get_datasets(db: Session = Depends(get_db)):
-    # Example dataset - replace this with actual data fetching or processing logic
     datasets = [
         DatasetInfo(
             Name="Statlog (German Credit Data)",
