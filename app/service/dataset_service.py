@@ -1,35 +1,57 @@
 # app/service/dataset_service.py
+from app.db.firebaseConfig import FirebaseConfig
 from app.model.dataset import DatasetAnalysis, DatasetInfo
 from app.service.utils.dataset_utils import initial_dataset_analysis
 from typing import List
 
 class DatasetService:
     def __init__(self):
-        self.datasets = [
-        DatasetInfo(
-            id = 1,
-            name="Statlog (German Credit Data)",
-            url="https://archive.ics.uci.edu/dataset/144/statlog+german+credit+data",
-            instances=1000,
-            description="This dataset classifies people described by a set of attributes as good or bad credit risks. Comes in two formats (one all numeric). Also comes with a cost matrix.",
-            sensitive_features = {"Gender": {"privilaged" : "Male", "Unprivilaged" : "Female"},
-                                  "Age": {"privilaged" : "Old", "Unprivilaged" : "Young"}}
-        ),
-        DatasetInfo(
-            id = 2,
-            name="Census Income",
-            url="https://archive.ics.uci.edu/dataset/20/census+income",
-            instances=48842,
-            description="Predict whether income exceeds $50K/yr based on census data. Also known as Adult dataset.",
-            sensitive_features = {"Gender": {"privilaged" : "Male", "Unprivilaged" : "Female"},
-                                  "Race": {"privilaged" : "White", "Unprivilaged" : "Non-white"},
-                                  "Age": {"privilaged" : "Old", "Unprivilaged" : "Young"}}
-        )
-    ]
+        firebase_config = FirebaseConfig()
+        self.db = firebase_config.get_db()
 
-    def get_datasets(self) -> List[DatasetInfo]:
+    def fetch_all_datasets(self) -> List[DatasetInfo]:
+        dataset_info_ref = self.db.collection('dataset_info')
+        docs = dataset_info_ref.stream()
+
+        dataset_info = []
+        for doc in docs:
+            data = doc.to_dict()
+            
+            dataset = DatasetInfo(
+                id=data.get('id'),
+                name=data.get('name'),
+                url=data.get('url'),
+                instances=data.get('instances'),
+                description=data.get('description'),
+                sensitive_features=data.get('sensitive_features', [])
+            )
+            dataset_info.append(dataset)
+        
+        self.datasets = dataset_info
         return self.datasets
     
     def get_initial_dataset_analysis(self, dataset_id) -> List[DatasetAnalysis]:
         return initial_dataset_analysis(dataset_id)
 
+    def add_dataset(self, name: str, url: str, instances: int, description: str, sensitive_features: dict) -> DatasetInfo:
+        dataset_info_ref = self.db.collection('dataset_info')
+
+        # may be better if we exclude id inside individual dataset document since auto generated id's are created by firestore
+        dataset_info_ref.add({
+            'name': name,
+            'url': url,
+            'instances': instances,
+            'description': description,
+            'sensitive_features': sensitive_features
+        })
+
+        
+        new_dataset = DatasetInfo(
+            name=name,
+            url=url,
+            instances=instances,
+            description=description,
+            sensitive_features=sensitive_features
+        )
+
+        return new_dataset

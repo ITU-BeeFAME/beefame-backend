@@ -23,5 +23,9 @@ def get_db():
 @router.get("/", response_model=SuccessResponse)
 def get_classifiers(db: Session = Depends(get_db)):
     service = ClassifierService()
-    classifiers = service.get_classifiers()
+    classifiers = service.fetch_all_classifiers()
+
+    # example usage of adding a classifier to db
+    # classifier_added = service.add_classifier("name", "url")
+    
     return SuccessResponse(data=classifiers)

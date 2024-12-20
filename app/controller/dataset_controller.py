@@ -23,11 +23,16 @@ def get_db():
 @router.get("/", response_model=SuccessResponse)
 def get_datasets(db: Session = Depends(get_db)):
     service = DatasetService()
-    datasets = service.get_datasets()
+    datasets = service.fetch_all_datasets()
+
+    # example usage of adding a dataset to db
+    # dataset_added = service.add_dataset("name", "https://archive.ics.uci.edu/dataset/20/census+income", 5, "description", {"Age": {"Unpreviliged": "A", "Previliged": "B"}})
+
     return SuccessResponse(data=datasets)
 
 @router.get("/{dataset_id}", response_model=SuccessResponse)
 def analyse_dataset(dataset_id: int, db: Session = Depends(get_db)):
     service = DatasetService()
     dataset_analysis = service.get_initial_dataset_analysis(dataset_id)
+
     return SuccessResponse(data=dataset_analysis)

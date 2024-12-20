@@ -1,4 +1,5 @@
 # app/service/item_service.py
+from app.db.firebaseConfig import FirebaseConfig
 from app.model.bias_metric import BiasMetric, BiasMetricRequest
 from app.model.classifier import ClassifierInfo
 from sqlalchemy.orm import Session
@@ -7,25 +8,35 @@ from typing import List, Optional
 
 class ClassifierService:
     def __init__(self):
-        self.classifiers = [
-        ClassifierInfo(
-            name="Support Vector Classification (SVC)",
-            url="https://scikit-learn.org/dev/modules/generated/sklearn.svm.SVC.html"
-        ),
-        ClassifierInfo(
-            name="Random Forest Classifier",
-            url="https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html"
-        ),
-        ClassifierInfo(
-            name="Logistic Regression",
-            url="https://scikit-learn.org/1.5/modules/generated/sklearn.linear_model.LogisticRegression.html"
-        ),
-        ClassifierInfo(
-            name="XGBClassifier",
-            url="https://xgboost.readthedocs.io/en/stable/get_started.html"
-        )
-    ]
+        firebase_config = FirebaseConfig()
+        self.db = firebase_config.get_db()
+    
+    def fetch_all_classifiers(self) -> List[ClassifierInfo]:
+        classifiers_ref = self.db.collection('classifiers')
+        docs = classifiers_ref.stream()
 
-    def get_classifiers(self) -> List[ClassifierInfo]:
+        classifiers = []
+        for doc in docs:
+            data = doc.to_dict()
+            
+            classifier = ClassifierInfo(
+                name=data.get('name'),
+                url=data.get('url'),
+            )
+            classifiers.append(classifier)
+        
+        self.classifiers = classifiers
         return self.classifiers
 
+    def add_classifier(self, name: str, url: str) -> ClassifierInfo:
+        classifiers_ref = self.db.collection('classifiers')
+        classifiers_ref.add({
+            'name': name,
+            'url': url
+        })
+
+        new_classifier = ClassifierInfo(
+            name=name,
+            url=url,
+        )
+        return new_classifier

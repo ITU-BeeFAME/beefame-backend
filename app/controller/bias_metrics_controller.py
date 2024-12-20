@@ -25,10 +25,12 @@ def get_db():
 def check_bias_metrics(datasetList: BiasMetricRequest, db: Session = Depends(get_db)):
     service = BiasMetricService()
     
-    bias_metrics = service.get_bias_metrics(datasetList)
-    
+    bias_metrics = service.fetch_all_bias_metrics(datasetList)
+
     if bias_metrics is None:
         return FailureResponse(status=404, message="No datasets found")
     
+    # example usage of adding a bias metric to db
+    # metric_added = service.add_bias_metric("abc", "def", "xyz", 75, "abc", ["aa"])
 
     return SuccessResponse(data=bias_metrics)

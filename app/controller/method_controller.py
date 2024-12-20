@@ -23,5 +23,9 @@ def get_db():
 @router.get("/", response_model=SuccessResponse)
 def get_methods(db: Session = Depends(get_db)):
     service = MethodService()
-    methods = service.get_methods()
+    methods = service.fetch_all_methods()
+
+    # example usage of adding a method to db
+    # method_added = service.add_method("name", "url")
+
     return SuccessResponse(data=methods)
