@@ -26,6 +26,6 @@ def get_methods(db: Session = Depends(get_db)):
     methods = service.fetch_all_methods()
 
     # example usage of adding a method to db
-    # method_added = service.add_method("name", "url")
+    # method_added = service.add_method("name", "url", "description", "type")
 
     return SuccessResponse(data=methods)
