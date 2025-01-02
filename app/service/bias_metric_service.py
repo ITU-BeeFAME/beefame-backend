@@ -18,6 +18,7 @@ class BiasMetricService:
             data = doc.to_dict()
             
             bias_metric = BiasMetric(
+                id = data.get('id'),
                 protectedAttribute=data.get('protectedAttribute'),
                 privilegedGroup=data.get('privilegedGroup'),
                 unprivilegedGroup=data.get('unprivilegedGroup'),

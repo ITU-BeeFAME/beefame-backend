@@ -20,6 +20,7 @@ class ClassifierService:
             data = doc.to_dict()
             
             classifier = ClassifierInfo(
+                id=data.get('id'),
                 name=data.get('name'),
                 url=data.get('url'),
             )

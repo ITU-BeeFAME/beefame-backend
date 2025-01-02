@@ -4,7 +4,7 @@ from pydantic import BaseModel, HttpUrl
 from typing import List
 
 class DatasetInfo(BaseModel):
-    id: int
+    id: str
     name: str
     url: HttpUrl
     instances: int

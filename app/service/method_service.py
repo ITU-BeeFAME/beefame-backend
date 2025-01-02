@@ -20,6 +20,7 @@ class MethodService:
             data = doc.to_dict()
             
             method = MethodInfo(
+                id=data.get('id'),
                 name=data.get('name'),
                 url=data.get('url'),
                 description=data.get('description'),
