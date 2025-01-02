@@ -2,9 +2,7 @@
 from app.db.firebaseConfig import FirebaseConfig
 from app.model.bias_metric import BiasMetric, BiasMetricRequest
 from app.model.classifier import ClassifierInfo
-from sqlalchemy.orm import Session
 from typing import List, Optional
-
 
 class ClassifierService:
     def __init__(self):
@@ -28,16 +26,25 @@ class ClassifierService:
         
         self.classifiers = classifiers
         return self.classifiers
-
+    
     def add_classifier(self, name: str, url: str) -> ClassifierInfo:
         classifiers_ref = self.db.collection('classifiers')
-        classifiers_ref.add({
+        result = classifiers_ref.add({
             'name': name,
             'url': url
         })
 
+        doc_ref = result[1]
+        classifier_id = doc_ref.id
+
+        doc_ref.update({
+            'id': classifier_id
+        })
+
         new_classifier = ClassifierInfo(
+            id=classifier_id,
             name=name,
             url=url,
         )
+
         return new_classifier

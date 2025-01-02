@@ -36,8 +36,7 @@ class DatasetService:
     def add_dataset(self, name: str, url: str, instances: int, description: str, sensitive_features: dict) -> DatasetInfo:
         dataset_info_ref = self.db.collection('dataset_info')
 
-        # may be better if we exclude id inside individual dataset document since auto generated id's are created by firestore
-        dataset_info_ref.add({
+        result = dataset_info_ref.add({
             'name': name,
             'url': url,
             'instances': instances,
@@ -45,8 +44,15 @@ class DatasetService:
             'sensitive_features': sensitive_features
         })
 
+        doc_ref = result[1]
+        dataset_id = doc_ref.id
+        
+        doc_ref.update({
+            'id': dataset_id
+        })
         
         new_dataset = DatasetInfo(
+            id=dataset_id,
             name=name,
             url=url,
             instances=instances,

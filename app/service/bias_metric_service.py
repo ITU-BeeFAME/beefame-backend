@@ -31,10 +31,36 @@ class BiasMetricService:
         self.bias_metrics = bias_metrics
         return bias_metrics
 
+    def fetch_bias_metrics(self, dataset: List[BiasMetricRequest]) -> List[BiasMetric]:
+        bias_metrics_ref = self.db.collection('bias_metrics')
+        bias_metrics = []
+        
+        for dataset_id in dataset:
+            doc_ref = bias_metrics_ref.document(dataset_id)
+            doc = doc_ref.get()
+            
+            if doc.exists:
+                data = doc.to_dict()
+                bias_metric = BiasMetric(
+                    id=doc.id,
+                    protectedAttribute=data.get('protectedAttribute'),
+                    privilegedGroup=data.get('privilegedGroup'),
+                    unprivilegedGroup=data.get('unprivilegedGroup'),
+                    accuracyRatio=data.get('accuracyRatio'),
+                    description=data.get('description'),
+                    metrics=data.get('metrics', [])
+                )
+                bias_metrics.append(bias_metric)
+            else:
+                print(f"Bias Metric with dataset ID {dataset_id} not found.")
+                
+        return bias_metrics
+        
     def add_bias_metric(self, protectedAttribute: str, privilegedGroup: str, unprivilegedGroup: str,
                         accuracyRatio: float, description: str, metrics: List[str]) -> BiasMetric:
         bias_metrics_ref = self.db.collection('bias_metrics')
-        bias_metrics_ref.add({
+
+        result = bias_metrics_ref.add({
             'protectedAttribute': protectedAttribute,
             'privilegedGroup': privilegedGroup,
             'unprivilegedGroup': unprivilegedGroup,
@@ -43,7 +69,15 @@ class BiasMetricService:
             'metrics': metrics
         })
 
+        doc_ref = result[1]
+        bias_metric_id = doc_ref.id
+
+        doc_ref.update({
+            'id': bias_metric_id
+        })
+
         new_bias_metric = BiasMetric(
+            id=bias_metric_id,
             protectedAttribute=protectedAttribute,
             privilegedGroup=privilegedGroup,
             unprivilegedGroup=unprivilegedGroup,

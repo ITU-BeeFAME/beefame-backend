@@ -33,14 +33,23 @@ class MethodService:
     
     def add_method(self, name: str, url: HttpUrl, description: str, type: str) -> MethodInfo:
         methods_ref = self.db.collection('methods')
-        methods_ref.add({
+        
+        result = methods_ref.add({
             'name': name,
             'url': url,
             'description': description,
             'type': type
         })
 
+        doc_ref = result[1]
+        method_id = doc_ref.id
+
+        doc_ref.update({
+            'id': method_id
+        })
+
         new_method = MethodInfo(
+            id= method_id,
             name= name,
             url= url,
             description= description,
