@@ -1,12 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.schema.item_model import Base  # Import Base from schema
-from app.database import engine
-from app.controller import item_controller, dataset_controller, method_controller, classifier_controller, bias_metrics_controller
-
-# Veritabanı tablolarını oluştur
-Base.metadata.create_all(bind=engine)
+from app.controller import dataset_controller, method_controller, classifier_controller, bias_metrics_controller, evaluation_controller
 
 app = FastAPI(
     title="BeeFair REST API",
@@ -23,9 +18,8 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Router'ları ekle
-app.include_router(item_controller.router)
 app.include_router(dataset_controller.router)
 app.include_router(method_controller.router)
 app.include_router(classifier_controller.router)
 app.include_router(bias_metrics_controller.router)
+app.include_router(evaluation_controller.router)

@@ -4,7 +4,6 @@ from app.model.response import FailureResponse, SuccessResponse
 from app.service.bias_metric_service import BiasMetricService
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from app.database import SessionLocal
 from app.model.method import MethodInfo
 
 router = APIRouter(

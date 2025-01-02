@@ -5,3 +5,11 @@ pydantic
 fairlearn
 ucimlrepo
 firebase-admin
+python-dotenv
+themis-ml
+aequitas
+pandas
+numpy
+scikit-learn
+xgboost
+aif360

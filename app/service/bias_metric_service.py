@@ -1,7 +1,6 @@
 # app/service/item_service.py
 from app.db.firebaseConfig import FirebaseConfig
 from app.model.bias_metric import BiasMetric, BiasMetricRequest
-from sqlalchemy.orm import Session
 from typing import List, Optional
 
 class BiasMetricService:
@@ -53,7 +52,7 @@ class BiasMetricService:
                 bias_metrics.append(bias_metric)
             else:
                 print(f"Bias Metric with dataset ID {dataset_id} not found.")
-                
+
         return bias_metrics
         
     def add_bias_metric(self, protectedAttribute: str, privilegedGroup: str, unprivilegedGroup: str,

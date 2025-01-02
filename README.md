@@ -14,22 +14,33 @@ git clone https://github.com/ITU-BeeFair/beefair-backend.git
 cd beefair-backend
 ```
 
-### 2. Create virtual environment
+If you want to develop with a virtual environment skip to step 3.
+
+### 2. Run with Docker
+
+Make sure you have Docker installed.
+
+If the server is going to be started for the first time:
+```
+docker-compose up --build
+```
+
+On subsequent starts:
+```
+docker-compose up
+```
+
+Lastly, to close the server:
+```
+docker-compose down
+```
+
+### 3. Run with virtual environment
 
 ```
 python -m venv venv
 source venv/bin/activate  # For Windows: venv\Scripts\activate
-```
-
-### 3. Install dependencies
-
-```
 pip install -r requirements.txt
-```
-
-## Running the application
-
-```
 uvicorn app.main:app --reload
 ```
 
