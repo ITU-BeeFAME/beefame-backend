@@ -1,7 +1,7 @@
 # app/service/item_service.py
-from app.db.firebaseConfig import FirebaseConfig
-from app.model.bias_metric import BiasMetric, BiasMetricRequest
-from app.model.classifier import ClassifierInfo
+from db.firebaseConfig import FirebaseConfig
+from model.bias_metric import BiasMetric, BiasMetricRequest
+from model.classifier import ClassifierInfo
 from typing import List, Optional
 
 class ClassifierService:

@@ -1,7 +1,7 @@
 # app/service/dataset_service.py
-from app.db.firebaseConfig import FirebaseConfig
-from app.model.dataset import DatasetAnalysis, DatasetInfo
-from app.service.utils.dataset_utils import initial_dataset_analysis
+from db.firebaseConfig import FirebaseConfig
+from model.dataset import DatasetAnalysis, DatasetInfo
+from service.utils.dataset_utils import initial_dataset_analysis
 from typing import List
 
 class DatasetService:

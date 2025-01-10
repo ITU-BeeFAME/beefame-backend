@@ -1,10 +1,10 @@
 # app/controller/item_controller.py
-from app.model.bias_metric import BiasMetric, BiasMetricRequest
-from app.model.response import FailureResponse, SuccessResponse
-from app.service.bias_metric_service import BiasMetricService
+from model.bias_metric import BiasMetric, BiasMetricRequest
+from model.response import FailureResponse, SuccessResponse
+from service.bias_metric_service import BiasMetricService
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from app.model.method import MethodInfo
+from model.method import MethodInfo
 
 router = APIRouter(
     prefix="/bias-metrics",

@@ -1,9 +1,9 @@
 # app/controller/item_controller.py
-from app.model.response import SuccessResponse
-from app.service.dataset_service import DatasetService
+from model.response import SuccessResponse
+from service.dataset_service import DatasetService
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from app.model.dataset import DatasetInfo, DatasetSelectionRequest
+from model.dataset import DatasetInfo, DatasetSelectionRequest
 
 router = APIRouter(
     prefix="/datasets",

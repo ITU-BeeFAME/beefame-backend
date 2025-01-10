@@ -1,9 +1,9 @@
 # app/controller/item_controller.py
-from app.model.response import SuccessResponse
-from app.service.classifier_service import ClassifierService
+from model.response import SuccessResponse
+from service.classifier_service import ClassifierService
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from app.model.classifier import ClassifierInfo
+from model.classifier import ClassifierInfo
 
 router = APIRouter(
     prefix="/classifiers",

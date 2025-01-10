@@ -1,6 +1,6 @@
 # app/service/item_service.py
-from app.db.firebaseConfig import FirebaseConfig
-from app.model.bias_metric import BiasMetric, BiasMetricRequest
+from db.firebaseConfig import FirebaseConfig
+from model.bias_metric import BiasMetric, BiasMetricRequest
 from typing import List, Optional
 
 class BiasMetricService:

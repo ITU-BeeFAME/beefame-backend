@@ -1,8 +1,7 @@
 # app/service/item_service.py
-from app.db.firebaseConfig import FirebaseConfig
-from app.model.bias_metric import BiasMetric, BiasMetricRequest
-from app.model.method import MethodInfo
-from sqlalchemy.orm import Session
+from db.firebaseConfig import FirebaseConfig
+from model.bias_metric import BiasMetric, BiasMetricRequest
+from model.method import MethodInfo
 from typing import List, Optional
 from pydantic import BaseModel, HttpUrl
 

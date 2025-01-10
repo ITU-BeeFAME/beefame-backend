@@ -1,9 +1,9 @@
 # app/controller/item_controller.py
-from app.model.response import SuccessResponse
-from app.service.method_service import MethodService
+from model.response import SuccessResponse
+from service.method_service import MethodService
 from fastapi import APIRouter, HTTPException, status
 from typing import List
-from app.model.method import MethodInfo
+from model.method import MethodInfo
 
 router = APIRouter(
     prefix="/methods",

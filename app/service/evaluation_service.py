@@ -1,5 +1,5 @@
 # app/service/evaluation_service.py
-from app.db.firebaseConfig import FirebaseConfig
+from db.firebaseConfig import FirebaseConfig
 from typing import List, Optional
 import pandas as pd
 import numpy as np
@@ -10,11 +10,10 @@ from sklearn.linear_model import LogisticRegression
 from xgboost import XGBClassifier
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix, roc_auc_score, balanced_accuracy_score
 from sklearn.preprocessing import StandardScaler
-import aequitas.flow.datasets as datasets
 from aif360.datasets import BinaryLabelDataset
 from aif360.metrics import ClassificationMetric
 from themis_ml.datasets import german_credit, census_income
-from service.utils.evaluation_utils import run_data_repairer, run_label_flipping, run_prevalence_sampling, run_relabeller
+from .utils.evaluation_utils import run_data_repairer, run_label_flipping, run_prevalence_sampling, run_relabeller
 from model.evaluation import ClassificationReport, EvaluationResult
 
 class EvaluationService:

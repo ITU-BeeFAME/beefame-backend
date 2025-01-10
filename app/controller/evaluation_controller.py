@@ -1,6 +1,6 @@
 # app/controller/evaluation_controller.py
-from app.model.response import SuccessResponse
-from app.service.evaluation_service import EvaluationService
+from model.response import SuccessResponse
+from service.evaluation_service import EvaluationService
 from fastapi import APIRouter, HTTPException, status
 from typing import List
 

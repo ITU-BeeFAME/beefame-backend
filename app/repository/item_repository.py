@@ -1,8 +1,8 @@
 # app/repository/item_repository.py
 from sqlalchemy.orm import Session
 from typing import List, Optional
-from app.schema.item_model import Item
-from app.model.item import ItemCreate, ItemUpdate
+from schema.item_model import Item
+from model.item import ItemCreate, ItemUpdate
 
 class ItemRepository:
     def __init__(self, db: Session):
