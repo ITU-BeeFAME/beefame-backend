@@ -5,11 +5,17 @@ from fairlearn.metrics import (
     false_positive_rate
 )
 import pandas as pd
+
+from model.classifier import ClassifierName
+from model.dataset import DatasetName
 pd.set_option('future.no_silent_downcasting', True)
 import numpy as np
 from scipy.stats import entropy
 from sklearn.model_selection import train_test_split
+from sklearn.svm import SVC
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.linear_model import LogisticRegression
+from xgboost import XGBClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.metrics import accuracy_score
 from ucimlrepo import fetch_ucirepo
@@ -58,10 +64,13 @@ def calculate_theil_index(y_true, y_pred):
     theil_index = pred_entropy - actual_entropy
     return theil_index
 
-def initial_dataset_analysis(dataset_id):
-    if dataset_id == 1: dataset_name = "german"
-    elif dataset_id == 2: dataset_name = "adult"
-
+def initial_dataset_analysis(dataset_name: str, classifier: str):
+    print("datasetname", dataset_name)
+    print("classifier", classifier)
+    print("xgb", ClassifierName.XGB)
+    print("svc", ClassifierName.SVC)
+    print("lr", ClassifierName.LR)
+    print("rfc", ClassifierName.RFC)
     dataset_dict = {"german" : 144, "adult" : 2}
 
     dataset = fetch_ucirepo(id=dataset_dict[dataset_name]) 
@@ -107,8 +116,18 @@ def initial_dataset_analysis(dataset_id):
     X_train_scaled = scaler.fit_transform(X_train)
     X_test_scaled = scaler.transform(X_test)
 
-    # Model training
+    # model default xgb
     model = LogisticRegression(random_state=42, max_iter=10000)
+
+    # Model training
+    if classifier == ClassifierName.SVC.value:
+        model = SVC(probability=True)
+    elif classifier == ClassifierName.RFC.value:
+        model = RandomForestClassifier(random_state=42)
+    elif classifier == ClassifierName.XGB.value:
+        print("here2")
+        model = XGBClassifier(random_state=42)
+
     model.fit(X_train_scaled, y_train)
 
     # Model prediction

@@ -18,7 +18,7 @@ class ClassifierService:
             data = doc.to_dict()
             
             classifier = ClassifierInfo(
-                id=data.get('id'),
+                id=doc.id,
                 name=data.get('name'),
                 url=data.get('url'),
             )

@@ -1,4 +1,7 @@
 # app/service/evaluation_service.py
+from model.classifier import ClassifierName
+from model.dataset import DatasetName
+from model.method import MethodName
 from db.firebaseConfig import FirebaseConfig
 from typing import List, Optional
 import pandas as pd
@@ -20,6 +23,134 @@ class EvaluationService:
     def __init__(self): 
         firebase_config = FirebaseConfig()
         self.db = firebase_config.get_db()
+
+    def get_evaluation(dataset_name: DatasetName, classifier_name: ClassifierName, method_name: MethodName) -> EvaluationResult:
+        # Dataset loading based on dataset_name
+        if dataset_name == DatasetName.GERMAN:
+            df = german_credit(raw=True)
+            label_column = 'credit_risk'
+            privileged_groups = ["telephone", "foreign_worker"]
+            selected_privileged_group = "telephone"
+        else:  # ADULT
+            df = census_income(raw=True)
+            label_column = 'income'
+            privileged_groups = ["race", "sex"]
+            selected_privileged_group = "sex"
+
+        # Parameters
+        test_size = 0.2
+        random_state = 82
+
+        # Prepare labels, features, and protected attribute
+        labels = pd.Series(df[label_column].values)
+        features = pd.get_dummies(df.drop(label_column, axis=1))
+
+        # Ensure all boolean columns are converted to integers
+        for col in features.columns:
+            if features[col].dtype == 'bool':
+                features[col] = features[col].astype(int)
+
+        protected_attribute = pd.Series(df[selected_privileged_group].values, dtype=int)
+
+        # Split data
+        X_train, X_test, y_train, y_test, s_train, s_test = train_test_split(
+            features, labels, protected_attribute, test_size=test_size, random_state=random_state)
+
+        # Ensure all feature names are strings
+        X_train.columns = X_train.columns.astype(str)
+        X_test.columns = X_test.columns.astype(str)
+
+        s_train = s_train.astype('category')
+
+        # Standardize the data
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
+
+        # Select method based on method_name
+        methods = {
+            MethodName.DataRepairer: run_data_repairer,
+            MethodName.PrevalanceSampling: run_prevalence_sampling,
+            MethodName.Relabeller: run_relabeller
+        }
+        
+        selected_method = methods[method_name]
+
+        # Select classifier based on classifier_name
+        classifiers = {
+            ClassifierName.XGB: XGBClassifier(random_state=random_state),
+            ClassifierName.SVC: SVC(probability=True),
+            ClassifierName.RFC: RandomForestClassifier(random_state=random_state),
+            ClassifierName.LR: LogisticRegression(max_iter=2000, random_state=random_state)
+        }
+        
+        selected_classifier = classifiers[classifier_name]
+
+        # Apply the selected method
+        X_train_transformed, y_train_transformed = selected_method(X_train, y_train, s_train)
+
+        X_train_transformed_scaled = scaler.fit_transform(X_train_transformed)
+        X_test_scaled = scaler.transform(X_test)
+
+        # Train and evaluate the selected classifier
+        selected_classifier.fit(X_train_transformed_scaled, y_train_transformed)
+        predictions = selected_classifier.predict(X_test_scaled)
+        prob_predictions = (selected_classifier.predict_proba(X_test_scaled)[:, 1] 
+                        if hasattr(selected_classifier, "predict_proba") 
+                        else selected_classifier.decision_function(X_test_scaled))
+
+        # Calculate metrics
+        accuracy = accuracy_score(y_test, predictions)
+        balanced_acc = balanced_accuracy_score(y_test, predictions)
+        auc_roc = roc_auc_score(y_test, prob_predictions)
+        report_dict = classification_report(y_test, predictions, output_dict=True)
+        conf_matrix = confusion_matrix(y_test, predictions)
+
+        # Create datasets for fairness metrics
+        dataset_true = BinaryLabelDataset(
+            df=pd.concat([
+                X_test.reset_index(drop=True),
+                pd.DataFrame(y_test.values, columns=[label_column]),
+                pd.DataFrame(s_test.values, columns=[selected_privileged_group])
+            ], axis=1),
+            label_names=[label_column],
+            protected_attribute_names=[selected_privileged_group]
+        )
+
+        dataset_pred = dataset_true.copy()
+        dataset_pred.labels = predictions.reshape(-1, 1)
+        
+        metric = ClassificationMetric(
+            dataset_true, 
+            dataset_pred,
+            unprivileged_groups=[{selected_privileged_group: 0}],
+            privileged_groups=[{selected_privileged_group: 1}]
+        )
+
+        # Prepare results
+        report_df = pd.DataFrame(report_dict).transpose()
+        
+        classification_result = ClassificationReport(
+            precision=report_df.get('precision', {}).to_dict(),
+            recall=report_df.get('recall', {}).to_dict(),
+            f1_score=report_df.get('f1-score', {}).to_dict(),
+            support=report_df.get('support', {}).to_dict()
+        )
+
+        evaluation_result = EvaluationResult(
+            name=f"{method_name.value} - {classifier_name.value}",
+            accuracy=accuracy,
+            balanced_accuracy=balanced_acc,
+            auc_roc=auc_roc,
+            classification_report=classification_result,
+            disparate_impact=metric.disparate_impact(),
+            statistical_parity_difference=metric.statistical_parity_difference(),
+            equal_opportunity_difference=metric.equal_opportunity_difference(),
+            average_odds_difference=metric.average_odds_difference(),
+            theil_index=metric.theil_index()
+        )
+
+        return evaluation_result
 
     def get_evaluation(self) -> List[EvaluationResult]:
         german_credit_df = german_credit(raw=True)

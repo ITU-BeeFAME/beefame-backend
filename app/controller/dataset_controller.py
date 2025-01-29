@@ -20,9 +20,10 @@ def get_datasets():
 
     return SuccessResponse(data=datasets)
 
-@router.get("/{dataset_id}", response_model=SuccessResponse)
+""" @router.get("/{dataset_id}", response_model=SuccessResponse)
 def analyse_dataset(dataset_id: int):
     service = DatasetService()
     dataset_analysis = service.get_initial_dataset_analysis(dataset_id)
 
     return SuccessResponse(data=dataset_analysis)
+ """

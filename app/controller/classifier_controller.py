@@ -10,7 +10,7 @@ router = APIRouter(
     tags=["Classifiers"],
 )
 
-@router.get("/all", response_model=SuccessResponse)
+@router.get("/", response_model=SuccessResponse)
 def get_classifiers():
     service = ClassifierService()
     classifiers = service.fetch_all_classifiers()

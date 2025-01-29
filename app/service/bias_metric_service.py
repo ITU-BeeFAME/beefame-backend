@@ -8,14 +8,14 @@ class BiasMetricService:
         firebase_config = FirebaseConfig()
         self.db = firebase_config.get_db()
 
-    def fetch_all_bias_metrics(self, dataset: List[BiasMetricRequest]) -> List[BiasMetric]:
+    def fetch_all_bias_metrics(self) -> List[BiasMetric]:
         bias_metrics_ref = self.db.collection('bias_metrics')
         docs = bias_metrics_ref.stream()
 
         bias_metrics = []
         for doc in docs:
             data = doc.to_dict()
-            
+            print("furkan data : ", data)
             bias_metric = BiasMetric(
                 id = data.get('id'),
                 protectedAttribute=data.get('protectedAttribute'),
@@ -34,7 +34,23 @@ class BiasMetricService:
         bias_metrics_ref = self.db.collection('bias_metrics')
         bias_metrics = []
         
-        for dataset_id in dataset:
+        docs = bias_metrics_ref.stream()
+        for doc in docs:
+                data = doc.to_dict()
+                bias_metric = BiasMetric(
+                    id=doc.id,
+                    protectedAttribute=data.get('protectedAttribute'),
+                    privilegedGroup=data.get('privilegedGroup'),
+                    unprivilegedGroup=data.get('unprivilegedGroup'),
+                    accuracyRatio=data.get('accuracyRatio'),
+                    description=data.get('description'),
+                    metrics=data.get('metrics', [])
+                )
+                bias_metrics.append(bias_metric)
+                # Dokümanları yazdırmak için
+                print(f"Document ID: {doc.id}, Data: {data}")
+
+        for dataset_id in dataset.dataset:
             doc_ref = bias_metrics_ref.document(dataset_id)
             doc = doc_ref.get()
             

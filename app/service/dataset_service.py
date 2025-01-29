@@ -1,6 +1,6 @@
 # app/service/dataset_service.py
 from db.firebaseConfig import FirebaseConfig
-from model.dataset import DatasetAnalysis, DatasetInfo
+from model.dataset import DatasetAnalysis, DatasetInfo, SensitiveFeatures
 from service.utils.dataset_utils import initial_dataset_analysis
 from typing import List
 
@@ -10,25 +10,30 @@ class DatasetService:
         self.db = firebase_config.get_db()
 
     def fetch_all_datasets(self) -> List[DatasetInfo]:
-        dataset_info_ref = self.db.collection('dataset_info')
-        docs = dataset_info_ref.stream()
-
-        dataset_info = []
+        datasets_ref = self.db.collection('datasets')
+        docs = datasets_ref.stream()
+        datasets = []
         for doc in docs:
             data = doc.to_dict()
-            
+            sensitive_features_data = data.get('sensitive_features', [])
+            sensitive_features = [
+                SensitiveFeatures(**feature) for feature in sensitive_features_data
+            ]
+
+            # DatasetInfo nesnesini oluştur
             dataset = DatasetInfo(
-                id=data.get('id'),
-                name=data.get('name'),
-                url=data.get('url'),
-                instances=data.get('instances'),
-                description=data.get('description'),
-                sensitive_features=data.get('sensitive_features', [])
+                id=doc.id,
+                name=data.get('name', ""),
+                slug=data.get('slug', ""),
+                url=data.get('url', ""),
+                instances=data.get('instances', 0),
+                description=data.get('description', "No description provided."),
+                sensitive_features=sensitive_features
             )
-            dataset_info.append(dataset)
+            datasets.append(dataset)
         
-        self.datasets = dataset_info
-        return self.datasets
+        
+        return datasets
     
     def get_initial_dataset_analysis(self, dataset_id) -> List[DatasetAnalysis]:
         return initial_dataset_analysis(dataset_id)

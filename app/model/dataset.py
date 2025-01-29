@@ -2,14 +2,24 @@
 
 from pydantic import BaseModel, HttpUrl
 from typing import List
+from enum import Enum
 
+class DatasetName(Enum):
+    GERMAN = "german"
+    ADULT = "adult"
+
+class SensitiveFeatures(BaseModel):
+    name: str
+    unprivileged: str
+    privileged: str
 class DatasetInfo(BaseModel):
     id: str
     name: str
+    slug: str
     url: HttpUrl
     instances: int
     description: str
-    sensitive_features: dict
+    sensitive_features: List[SensitiveFeatures]
 
 class DatasetSelectionRequest(BaseModel):
     names: List[str]
