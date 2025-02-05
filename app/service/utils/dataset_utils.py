@@ -66,94 +66,96 @@ def calculate_theil_index(y_true, y_pred):
     return theil_index
 
 def initial_dataset_analysis(dataset_names: List[str], classifiers: List[str]):
-    print("datasetname", dataset_names)
-    print("classifier", classifiers)
-   
-    dataset_name = dataset_names[0].value
-    classifier = classifiers[0].value
+    all_results = []
+    dataset_dict = {"german": 144, "adult": 2}
 
-    """ TO DO : Analysis must be applied for multiple items """
-    dataset_dict = {"german" : 144, "adult" : 2}
+    # Iterate through each dataset
+    for dataset_name in dataset_names:
+        dataset_name = dataset_name.value
+        dataset = fetch_ucirepo(id=dataset_dict[dataset_name])
+        
+        X = dataset.data.features
+        y = dataset.data.targets
 
-    dataset = fetch_ucirepo(id=dataset_dict[dataset_name]) 
-    
-    X = dataset.data.features 
-    y = dataset.data.targets 
+        if isinstance(y, pd.DataFrame):
+            y = y.squeeze() # Convert DataFrame to Series if necessary
 
-    if isinstance(y, pd.DataFrame):
-        y = y.squeeze()  # Convert DataFrame to Series if necessary
+        # Preprocess data based on dataset type
+        if dataset_name == "adult":
+            y = y.replace({'<=50K': 0, '<=50K.': 0, '>50K': 1, '>50K.': 1}).astype(int)
+            if 'age' in X.columns:
+                age_threshold = 50
+                X['age_binary'] = (X['age'] >= age_threshold).astype(int)
+                X.drop('age', axis=1, inplace=True) # Remove the original 'age' column
+            if 'race' in X.columns:
+                X['race_binary'] = (X['race'] == 'White').astype(int)
+                X.drop('race', axis=1, inplace=True)
+            sensitive_columns = ['sex_Female', 'age_binary', 'race_binary']
+            sensitive_columns_display = {'sex_Female': 'Gender', 'age_binary': "Age", 'race_binary': "Race"}
 
-    if dataset_name == "adult":
-        y = y.replace({'<=50K': 0, '<=50K.': 0, '>50K': 1, '>50K.': 1}).astype(int)
-        if 'age' in X.columns:
-            age_threshold = 50
-            X['age_binary'] = (X['age'] >= age_threshold).astype(int)
-            X.drop('age', axis=1, inplace=True)  # Remove the original 'age' column
-        if 'race' in X.columns:
-            X['race_binary'] = (X['race'] == 'White').astype(int)
-            X.drop('race', axis=1, inplace=True)  # Optionally remove the original 'race' column
-        sensitive_columns = ['sex_Female', 'age_binary', 'race_binary']  
-        sensitive_columns_display = {'sex_Female': 'Gender', 'age_binary': "Age", 'race_binary': "Race"}
+        elif dataset_name == "german":
+            if 'Attribute13' in X.columns:
+                age_threshold = 50
+                X['age_binary'] = (X['Attribute13'] >= age_threshold).astype(int)
+                X.drop('Attribute13', axis=1, inplace=True) # Remove the original 'age' column
+            sensitive_columns = ['Attribute9_A91', 'age_binary']
+            sensitive_columns_display = {'Attribute9_A91': 'Gender', 'age_binary': 'Age'}
 
-    elif dataset_name == "german":
-        if 'Attribute13' in X.columns:
-            age_threshold = 50
-            X['age_binary'] = (X['Attribute13'] >= age_threshold).astype(int)
-            X.drop('Attribute13', axis=1, inplace=True)  # Remove the original 'age' column
-        sensitive_columns = ['Attribute9_A91', 'age_binary'] 
-        sensitive_columns_display = {'Attribute9_A91': 'Gender',
-                                'age_binary' : 'Age'}
+        # Handling potential SettingWithCopyWarning correctly
+        X = X.copy().replace('?', np.nan).dropna()
+        y = y.loc[X.index]
 
-    # Handling potential SettingWithCopyWarning correctly
-    X = X.copy().replace('?', np.nan).dropna()
-    y = y.loc[X.index]
+        if y.nunique() == 2 and set(y.unique()).issubset({1, 2}):
+            # Map 1 -> 0 and 2 -> 1
+            y = y.replace({1: 0, 2: 1}).astype(int)
 
-    """Bu kalacak"""
-    if y.nunique() == 2 and set(y.unique()).issubset({1, 2}):
-        # Map 1 -> 0 and 2 -> 1
-        y = y.replace({1: 0, 2: 1}).astype(int)
+        # One-hot encode categorical variables
+        X = pd.get_dummies(X)
 
-    # One-hot encode categorical variables
-    X = pd.get_dummies(X)
-    # Split data
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        # Split the data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
-    # Scaling features only at the point of training
-    scaler = StandardScaler()
-    X_train_scaled = scaler.fit_transform(X_train)
-    X_test_scaled = scaler.transform(X_test)
+        # Scaling features only at the point of training
+        scaler = StandardScaler()
+        X_train_scaled = scaler.fit_transform(X_train)
+        X_test_scaled = scaler.transform(X_test)
 
-    # model default xgb
-    model = LogisticRegression(random_state=42, max_iter=10000)
+        # Iterate through each classifier
+        for classifier_name in classifiers:
+            classifier_name = classifier_name.value
+            
+            # Select classifier
+            if classifier_name == ClassifierName.SVC.value:
+                model = SVC(probability=True)
+            elif classifier_name == ClassifierName.RFC.value:
+                model = RandomForestClassifier(random_state=42)
+            elif classifier_name == ClassifierName.XGB.value:
+                model = XGBClassifier(random_state=42)
+            else:  # Default to LogisticRegression
+                model = LogisticRegression(random_state=42, max_iter=10000)
 
-    # Model training
-    if classifier == ClassifierName.SVC.value:
-        model = SVC(probability=True)
-    elif classifier == ClassifierName.RFC.value:
-        model = RandomForestClassifier(random_state=42)
-    elif classifier == ClassifierName.XGB.value:
-        model = XGBClassifier(random_state=42)
+            model.fit(X_train_scaled, y_train)
 
-    model.fit(X_train_scaled, y_train)
+            # Model prediction
+            y_pred = model.predict(X_test_scaled)
 
-    # Model prediction
-    y_pred = model.predict(X_test_scaled)
+            # Model evaluation
+            accuracy = accuracy_score(y_test, y_pred)
 
-    # Model evaluation
-    accuracy = accuracy_score(y_test, y_pred)
+            # Calculate metrics for each sensitive column
+            for sensitive_column in sensitive_columns:
+                if sensitive_column in X.columns:
+                    metrics = {
+                        "Dataset": dataset_name,
+                        "Classifier": classifier_name,
+                        "Sensitive Column": sensitive_columns_display[sensitive_column],
+                        "Model Accuracy": accuracy,
+                        "Statistical Parity Difference": calculate_statistical_parity_difference(X_test, y_test, y_pred, sensitive_column),
+                        "Equal Opportunity Difference": calculate_equal_opportunity_difference(X_test, y_test, y_pred, sensitive_column),
+                        "Average Odds Difference": calculate_average_odds_difference(X_test, y_test, y_pred, sensitive_column),
+                        "Disparate Impact": calculate_disparate_impact(X_test, y_test, y_pred, sensitive_column),
+                        "Theil Index": calculate_theil_index(y_test, y_pred)
+                    }
+                    all_results.append(metrics)
 
-    final_metrics = []
-    for sensitive_column in sensitive_columns:
-        if sensitive_column in X.columns:
-            final_metrics.append({
-                "Sensitive Column" : sensitive_columns_display[sensitive_column],
-                "Model Accuracy" : accuracy,
-                "Statistical Parity Difference" : calculate_statistical_parity_difference(X_test, y_test, y_pred, sensitive_column),
-                "Equal Opportunity Difference" : calculate_equal_opportunity_difference(X_test, y_test, y_pred, sensitive_column),
-                "Average Odds Difference" : calculate_average_odds_difference(X_test, y_test, y_pred, sensitive_column),
-                "Disparate Impact" : calculate_disparate_impact(X_test, y_test, y_pred, sensitive_column),
-                "Theil Index" : calculate_theil_index(y_test, y_pred)
-            })
-
-    return final_metrics
-
+    return all_results
