@@ -1,33 +1,16 @@
 # app/service/item_service.py
-from db.firebaseConfig import FirebaseConfig
-from model.bias_metric import BiasMetric, BiasMetricRequest
+from repository.classifier_repository import ClassifierRepository
 from model.classifier import ClassifierInfo
-from typing import List, Optional
+from typing import List
 
 class ClassifierService:
     def __init__(self):
-        firebase_config = FirebaseConfig()
-        self.db = firebase_config.get_db()
+        pass
     
-    def fetch_all_classifiers(self) -> List[ClassifierInfo]:
-        classifiers_ref = self.db.collection('classifiers')
-        docs = classifiers_ref.stream()
-
-        classifiers = []
-        for doc in docs:
-            data = doc.to_dict()
-            
-            classifier = ClassifierInfo(
-                id=doc.id,
-                name=data.get('name'),
-                url=data.get('url'),
-            )
-            classifiers.append(classifier)
-        
-        self.classifiers = classifiers
-        return self.classifiers
+    def get_classifiers(self) -> List[ClassifierInfo]:
+        return ClassifierRepository.get_classifiers()
     
-    def add_classifier(self, name: str, url: str) -> ClassifierInfo:
+    
         classifiers_ref = self.db.collection('classifiers')
         result = classifiers_ref.add({
             'name': name,

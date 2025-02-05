@@ -13,7 +13,7 @@ class SensitiveFeatures(BaseModel):
     unprivileged: str
     privileged: str
 class DatasetInfo(BaseModel):
-    id: str
+    id: int
     name: str
     slug: str
     url: HttpUrl

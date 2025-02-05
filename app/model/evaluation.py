@@ -1,6 +1,6 @@
 # app/model/evaluation.py
 from pydantic import BaseModel
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from model.classifier import ClassifierName
 from model.dataset import DatasetName
@@ -25,6 +25,6 @@ class EvaluationResult(BaseModel):
     theil_index: float
 
 class EvaluationRequest(BaseModel):
-    dataset_name: DatasetName
-    classifier_name: ClassifierName
-    method_name: MethodName
+    dataset_names: List[DatasetName]
+    classifier_names: List[ClassifierName]
+    method_names: List[MethodName]

@@ -1,0 +1,22 @@
+[
+  {
+    "id": 1,
+    "name": "XGBClassifier",
+    "url": "https://xgboost.readthedocs.io/en/stable/get_started.html"
+  },
+  {
+    "id": 2,
+    "name": "Support Vector Classification (SVC)",
+    "url": "https://scikit-learn.org/dev/modules/generated/sklearn.svm.SVC.html"
+  },
+  {
+    "id": 3,
+    "name": "Random Forest Classifier",
+    "url": "https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.RandomForestClassifier.html"
+  },
+  {
+    "id": 4,
+    "name": "Logistic Regression",
+    "url": "https://scikit-learn.org/1.5/modules/generated/sklearn.linear_model.LogisticRegression.html"
+  }
+]

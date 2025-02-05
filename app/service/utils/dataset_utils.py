@@ -1,3 +1,4 @@
+from typing import List
 from fairlearn.metrics import (
     MetricFrame,
     selection_rate,
@@ -64,13 +65,14 @@ def calculate_theil_index(y_true, y_pred):
     theil_index = pred_entropy - actual_entropy
     return theil_index
 
-def initial_dataset_analysis(dataset_name: str, classifier: str):
-    print("datasetname", dataset_name)
-    print("classifier", classifier)
-    print("xgb", ClassifierName.XGB)
-    print("svc", ClassifierName.SVC)
-    print("lr", ClassifierName.LR)
-    print("rfc", ClassifierName.RFC)
+def initial_dataset_analysis(dataset_names: List[str], classifiers: List[str]):
+    print("datasetname", dataset_names)
+    print("classifier", classifiers)
+   
+    dataset_name = dataset_names[0].value
+    classifier = classifiers[0].value
+
+    """ TO DO : Analysis must be applied for multiple items """
     dataset_dict = {"german" : 144, "adult" : 2}
 
     dataset = fetch_ucirepo(id=dataset_dict[dataset_name]) 
@@ -106,6 +108,11 @@ def initial_dataset_analysis(dataset_name: str, classifier: str):
     X = X.copy().replace('?', np.nan).dropna()
     y = y.loc[X.index]
 
+    """Bu kalacak"""
+    if y.nunique() == 2 and set(y.unique()).issubset({1, 2}):
+        # Map 1 -> 0 and 2 -> 1
+        y = y.replace({1: 0, 2: 1}).astype(int)
+
     # One-hot encode categorical variables
     X = pd.get_dummies(X)
     # Split data
@@ -125,7 +132,6 @@ def initial_dataset_analysis(dataset_name: str, classifier: str):
     elif classifier == ClassifierName.RFC.value:
         model = RandomForestClassifier(random_state=42)
     elif classifier == ClassifierName.XGB.value:
-        print("here2")
         model = XGBClassifier(random_state=42)
 
     model.fit(X_train_scaled, y_train)

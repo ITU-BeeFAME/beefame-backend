@@ -1,14 +1,13 @@
 # app/service/analyse_service.py
+from typing import List
 from model.classifier import ClassifierName
-from db.firebaseConfig import FirebaseConfig
 from model.dataset import DatasetName
 from service.utils.dataset_utils import initial_dataset_analysis
 class AnalysisService:
     def __init__(self):
-        firebase_config = FirebaseConfig()
-        self.db = firebase_config.get_db()
+        pass
 
-    def analyse(self, dataset_name: DatasetName, classifier_name: ClassifierName) -> str:
-        return initial_dataset_analysis(dataset_name.value, classifier_name.value)
+    def analyse(self, dataset_names: List[DatasetName], classifier_names: List[ClassifierName]) -> str:
+        return initial_dataset_analysis(dataset_names, classifier_names)
     
     

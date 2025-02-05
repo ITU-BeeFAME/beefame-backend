@@ -1,7 +1,7 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from controller import analysis_router, dataset_router, method_router, classifier_router, bias_metrics_router, evaluation_router
+from controller import analysis_router, dataset_router, method_router, classifier_router, evaluation_router
 
 app = FastAPI(
     title="BeeFair REST API",
@@ -23,5 +23,4 @@ app.include_router(analysis_router)
 app.include_router(dataset_router)
 app.include_router(method_router)
 app.include_router(classifier_router)
-app.include_router(bias_metrics_router)
 app.include_router(evaluation_router)

@@ -5,7 +5,7 @@ from enum import Enum
 
 
 class ClassifierInfo(BaseModel):
-    id: str
+    id: int
     name: str
     url: HttpUrl
 

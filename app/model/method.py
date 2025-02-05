@@ -4,7 +4,7 @@ from pydantic import BaseModel, HttpUrl
 from enum import Enum
 
 class MethodInfo(BaseModel):
-    id: str
+    id: int
     name: str
     type: str
     url: HttpUrl
