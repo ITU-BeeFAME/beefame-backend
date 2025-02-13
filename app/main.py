@@ -6,7 +6,7 @@ from controller import analysis_router, dataset_router, method_router, classifie
 app = FastAPI(
     title="BeeFair REST API",
     description="BeeFair Fair Testing Tool REST API",
-    version="1.0.0",
+    version="1.0.1",
 )
 
 # CORS related configuration 
