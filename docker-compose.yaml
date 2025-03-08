@@ -10,3 +10,12 @@ services:
       - ./app:/app
     env_file:
       - .env  
+
+  cli:
+    build:
+      context: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - ./app:/app
+
