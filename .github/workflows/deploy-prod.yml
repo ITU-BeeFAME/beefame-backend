@@ -22,4 +22,4 @@ jobs:
           script: |
             cd /var/www/api
             git pull origin main
-            docker-compose up app --build
+            docker-compose up app
