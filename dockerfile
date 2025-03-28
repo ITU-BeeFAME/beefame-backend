@@ -1,8 +1,8 @@
 FROM --platform=linux/amd64 python:3.9-slim
 
-RUN apt-get update && apt-get install -y \
-    libgomp1 \
-    build-essential
+RUN apt-get update && \
+    apt-get install -y --fix-broken && \
+    apt-get install -y libgomp1 build-essential
 
 # Set working directory
 WORKDIR /app

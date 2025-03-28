@@ -48,3 +48,11 @@ The API documentation will be available at:
 
 - Swagger UI: `http://127.0.0.1:8000/docs`
 - Redoc: `http://127.0.0.1:8000/redoc`
+
+
+### 4. To Run CLI
+
+```
+docker-compose up
+docker-compose exec cli python -m cli.cli_macos_linux
+```
