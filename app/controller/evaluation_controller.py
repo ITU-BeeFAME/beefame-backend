@@ -2,7 +2,6 @@
 from model.evaluation import EvaluationRequest
 from model.response import SuccessResponse
 from service.evaluation_service import EvaluationService
-from service.evaluation_service import EvaluationService
 from fastapi import APIRouter
 
 router = APIRouter(
