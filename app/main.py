@@ -7,7 +7,7 @@ from controller import analysis_router, dataset_router, method_router, classifie
 app = FastAPI(
     title="BeeFAME REST API",
     description="BeeFAME | Fairness Analysis Mitigation and Explainability",
-    version="1.0.1",
+    version="1.0.2",
 )
 
 # CORS related configuration 
