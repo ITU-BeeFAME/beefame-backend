@@ -1,12 +1,13 @@
 # app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from controller import analysis_router, dataset_router, method_router, classifier_router, evaluation_router
 
 app = FastAPI(
-    title="BeeFair REST API",
-    description="BeeFair Fair Testing Tool REST API",
-    version="1.0.1",
+    title="BeeFAME REST API",
+    description="BeeFAME | Fairness Analysis Mitigation and Explainability",
+    version="1.0.0",
 )
 
 # CORS related configuration 
@@ -17,6 +18,13 @@ app.add_middleware(
     allow_methods=["*"],  
     allow_headers=["*"],
 )
+
+@app.get("/status", summary="Health Check")
+def get_status():
+    return JSONResponse(content={
+        "name": app.title,
+        "version": app.version
+    })
 
 # Include routers
 app.include_router(analysis_router)
