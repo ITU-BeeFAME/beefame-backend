@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Dict, Any
 from fairlearn.metrics import (
     MetricFrame,
     selection_rate,
@@ -65,7 +65,7 @@ def calculate_theil_index(y_true, y_pred):
     theil_index = pred_entropy - actual_entropy
     return theil_index
 
-def initial_dataset_analysis(dataset_names: List[str], classifiers: List[str]):
+def initial_dataset_analysis(dataset_names: List[str], classifiers: List[Dict[str, Any]]):
     all_results = []
     dataset_dict = {"german": 144, "adult": 2}
 
@@ -121,18 +121,20 @@ def initial_dataset_analysis(dataset_names: List[str], classifiers: List[str]):
         X_test_scaled = scaler.transform(X_test)
 
         # Iterate through each classifier
-        for classifier_name in classifiers:
-            classifier_name = classifier_name.value
-            
+        for classifier_obj in classifiers:
+            classifier_name = classifier_obj.name
+            params = classifier_obj.params or {}
+
             # Select classifier
             if classifier_name == ClassifierName.SVC.value:
-                model = SVC(probability=True)
+                model = SVC(probability=True, **params)
             elif classifier_name == ClassifierName.RFC.value:
-                model = RandomForestClassifier(random_state=42)
+                model = RandomForestClassifier(random_state=42, **params)
             elif classifier_name == ClassifierName.XGB.value:
-                model = XGBClassifier(random_state=42)
+                model = XGBClassifier(random_state=42, **params)
             else:  # Default to LogisticRegression
-                model = LogisticRegression(random_state=42, max_iter=10000)
+                # model = LogisticRegression(random_state=42, max_iter=10000, **params)
+                model = LogisticRegression(random_state=42, **params)
 
             model.fit(X_train_scaled, y_train)
 

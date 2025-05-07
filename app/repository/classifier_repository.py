@@ -2,7 +2,7 @@
 import json
 from pathlib import Path
 from typing import List, Optional
-from model.classifier import ClassifierInfo
+from model.classifier import ClassifierInfo, ClassifierParam
 
 class ClassifierRepository:
     @staticmethod
@@ -16,12 +16,15 @@ class ClassifierRepository:
 
         classifiers = []
         for classifier in raw_data:
-            
+            params = [
+                ClassifierParam(**param) for param in classifier.get("params", [])
+            ]
 
             classifier_info = ClassifierInfo(
                 id=classifier["id"],
                 name=classifier["name"],
                 url=classifier["url"],
+                params=params
             )
 
             classifiers.append(classifier_info)

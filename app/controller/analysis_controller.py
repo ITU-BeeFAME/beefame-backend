@@ -13,6 +13,6 @@ router = APIRouter(
 @router.post("/", response_model=SuccessResponse)
 def analyse_dataset(request: AnalyseRequest):
     service = AnalysisService()
-    analysis_result = service.analyse(request.dataset_names, request.classifier_names)
+    analysis_result = service.analyse(request.dataset_names, request.classifiers)
 
     return SuccessResponse(data=analysis_result)

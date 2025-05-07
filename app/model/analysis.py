@@ -1,9 +1,11 @@
-from typing import List
+from typing import List, Dict, Any
 from pydantic import BaseModel
-
-from model.classifier import ClassifierName
 from model.dataset import DatasetName
+
+class ClassifierRequest(BaseModel):
+    name: str
+    params: Dict[str, Any] = {}
 
 class AnalyseRequest(BaseModel):
     dataset_names: List[DatasetName]
-    classifier_names: List[ClassifierName]
+    classifiers: List[ClassifierRequest]
