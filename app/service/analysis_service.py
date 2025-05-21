@@ -12,7 +12,7 @@ from service.utils.dataset_utils import initial_dataset_analysis
 
 class AnalysisService:
     def __init__(self):
-        self.redis_client = redis.Redis(host='127.0.0.1', port=6379, db=0, decode_responses=True)
+        self.redis_client = redis.Redis(host='172.17.0.1', port=6379, db=0, decode_responses=True)
 
     def _get_cache_key(self, dataset_name: str, classifier_name: str) -> str:
         return f"{self._slugify(dataset_name)}:{self._slugify(classifier_name)}"
