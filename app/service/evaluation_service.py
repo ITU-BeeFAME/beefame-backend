@@ -20,7 +20,7 @@ import redis
 #172.17.0.1
 class EvaluationService:
     def __init__(self): 
-        self.redis_client = redis.Redis(host='host.docker.internal', port=6379, db=0, decode_responses=True)
+        self.redis_client = redis.Redis(host='172.17.0.1', port=6379, db=0, decode_responses=True)
     
     def _get_cache_key(self, dataset_name: str, classifier_name: str, method_name:str) -> str:
         return f"{self._slugify(dataset_name)}:{self._slugify(classifier_name)}:{self._slugify(method_name)}"
