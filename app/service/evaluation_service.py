@@ -149,7 +149,7 @@ class EvaluationService:
 
                         # Train and evaluate models for each sensitive attribute
                         for sensitive_column in sensitive_columns:
-                            protected_attribute = pd.Series(X[sensitive_columns[0]].values, index=X.index, dtype=int)
+                            protected_attribute = pd.Series(X[sensitive_column].values, index=X.index, dtype=int)
 
                             # Split data once and reuse across methods
                             X_train, X_test, y_train, y_test, s_train, s_test = train_test_split(
