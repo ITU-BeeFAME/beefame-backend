@@ -1,4 +1,4 @@
-version: '3.8'
+version: "3.8"
 
 services:
   app:
@@ -9,7 +9,8 @@ services:
     volumes:
       - ./app:/app
     env_file:
-      - .env  
+      - .env
+    command: uvicorn main:app --host 0.0.0.0 --port 8000 --proxy-headers
 
   cli:
     build:
@@ -18,4 +19,3 @@ services:
     tty: true
     volumes:
       - ./app:/app
-
