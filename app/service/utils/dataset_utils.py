@@ -65,7 +65,11 @@ def calculate_theil_index(y_true, y_pred):
     theil_index = pred_entropy - actual_entropy
     return theil_index
 
-def initial_dataset_analysis(dataset_names: List[str], classifiers: List[Dict[str, Any]]):
+def initial_dataset_analysis(
+    dataset_names: List[str],
+    classifiers: List[Dict[str, Any]],
+    test_size: float = 0.2,
+):
     all_results = []
     dataset_dict = {"german": 144, "adult": 2}
 
@@ -113,7 +117,12 @@ def initial_dataset_analysis(dataset_names: List[str], classifiers: List[Dict[st
         X = pd.get_dummies(X)
 
         # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+        X_train, X_test, y_train, y_test = train_test_split(
+            X,
+            y,
+            test_size=test_size,
+            random_state=42,
+        )
 
         # Scaling features only at the point of training
         scaler = StandardScaler()

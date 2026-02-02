@@ -4,7 +4,7 @@ import re
 from typing import List
 import json
 import unicodedata
-import redis
+from service.redis_client import get_redis_client
 from model.analysis import ClassifierRequest
 from model.classifier import ClassifierName
 from model.dataset import DatasetName
@@ -12,10 +12,10 @@ from service.utils.dataset_utils import initial_dataset_analysis
 
 class AnalysisService:
     def __init__(self):
-        self.redis_client = redis.Redis(host='172.17.0.1', port=6379, db=0, decode_responses=True)
+        self.redis_client = get_redis_client()
 
-    def _get_cache_key(self, dataset_name: str, classifier_name: str) -> str:
-        return f"{self._slugify(dataset_name)}:{self._slugify(classifier_name)}"
+    def _get_cache_key(self, dataset_name: str, classifier_name: str, test_size: float) -> str:
+        return f"{self._slugify(dataset_name)}:{self._slugify(classifier_name)}:{test_size:.4f}"
 
     def _slugify(self,text: str) -> str:
         # Unicode karakterleri ASCII'ye çevir
@@ -28,14 +28,14 @@ class AnalysisService:
         text = text.strip('-')
         return text
 
-    def analyse(self, dataset_names: List[DatasetName], classifier_requests: List[ClassifierRequest]) -> str:
+    def analyse(self, dataset_names: List[DatasetName], classifier_requests: List[ClassifierRequest], test_size: float = 0.2) -> str:
         results = []
         missing_pairs = []
 
         for dataset in dataset_names:
             for classifier_request in classifier_requests:
                 classifier_name = classifier_request.name
-                cache_key = self._get_cache_key(dataset.value, classifier_name)
+                cache_key = self._get_cache_key(dataset.value, classifier_name, test_size)
                 cached = self.redis_client.get(cache_key)
 
                 if cached:
@@ -55,7 +55,11 @@ class AnalysisService:
                     seen.add(key)
                     classifiers_to_calculate.append(cr)
 
-            calculated_results = initial_dataset_analysis(datasets_to_calculate, classifiers_to_calculate)
+            calculated_results = initial_dataset_analysis(
+                datasets_to_calculate,
+                classifiers_to_calculate,
+                test_size=test_size,
+            )
 
             grouped_data = defaultdict(list)
             for entry in calculated_results:
@@ -63,15 +67,8 @@ class AnalysisService:
                 grouped_data[key].append(entry)
 
             for (dataset, classifier), entries in grouped_data.items():
-                cache_key = self._get_cache_key(dataset, classifier)
+                cache_key = self._get_cache_key(dataset, classifier, test_size)
                 self.redis_client.set(cache_key, json.dumps(entries))
                 results.extend(entries)
 
         return results
-
-
-        
-    
-    
-    
-    

@@ -10,8 +10,12 @@ WORKDIR /app
 # Copy requirements.txt first to install dependencies
 COPY ./app/requirements.txt /app/
 
+ENV PIP_DEFAULT_TIMEOUT=300 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    PIP_RETRIES=10
+
 # Install dependencies directly using pip
-RUN pip install -r requirements.txt
+RUN pip install --no-cache-dir --retries 10 --timeout 300 -r requirements.txt
 
 # Copy the rest of the application code into the container
 COPY ./app /app

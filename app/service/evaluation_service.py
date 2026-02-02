@@ -16,14 +16,14 @@ import logging
 import json
 import re
 import unicodedata
-import redis
-#172.17.0.1
+from service.redis_client import get_redis_client
+
 class EvaluationService:
     def __init__(self): 
-        self.redis_client = redis.Redis(host='172.17.0.1', port=6379, db=0, decode_responses=True)
+        self.redis_client = get_redis_client()
     
-    def _get_cache_key(self, dataset_name: str, classifier_name: str, method_name:str) -> str:
-        return f"{self._slugify(dataset_name)}:{self._slugify(classifier_name)}:{self._slugify(method_name)}"
+    def _get_cache_key(self, dataset_name: str, classifier_name: str, method_name: str, test_size: float) -> str:
+        return f"{self._slugify(dataset_name)}:{self._slugify(classifier_name)}:{self._slugify(method_name)}:{test_size:.4f}"
 
     def _slugify(self,text: str) -> str:
         # Unicode karakterleri ASCII'ye çevir
@@ -36,10 +36,10 @@ class EvaluationService:
         text = text.strip('-')
         return text
     
-    def _get_cached_result(self, dataset_name: str, classifier_name: str, method_name: str):
+    def _get_cached_result(self, dataset_name: str, classifier_name: str, method_name: str, test_size: float):
         """Cache'den sonuç getir"""
         try:
-            cache_key = self._get_cache_key(dataset_name, classifier_name, method_name)
+            cache_key = self._get_cache_key(dataset_name, classifier_name, method_name, test_size)
             cached_data = self.redis_client.get(cache_key)
             if cached_data:
                 return json.loads(cached_data)
@@ -48,21 +48,20 @@ class EvaluationService:
             logging.warning(f"Cache read error: {str(e)}")
             return None
 
-    def _set_cached_result(self, dataset_name: str, classifier_name: str, method_name: str, result_data: list):
+    def _set_cached_result(self, dataset_name: str, classifier_name: str, method_name: str, test_size: float, result_data: list):
         """Sonucu cache'e kaydet"""
         try:
-            cache_key = self._get_cache_key(dataset_name, classifier_name, method_name)
+            cache_key = self._get_cache_key(dataset_name, classifier_name, method_name, test_size)
             # 24 saat (86400 saniye) TTL ile cache'e kaydet
             self.redis_client.setex(cache_key, 86400, json.dumps(result_data))
         except Exception as e:
             logging.warning(f"Cache write error: {str(e)}")
 
-    def evaluate(self, dataset_list, classifier_list, method_list):
+    def evaluate(self, dataset_list, classifier_list, method_list, test_size: float = 0.2):
         try:
             # Suppress all warnings during evaluation
             warnings.filterwarnings('ignore')
             
-            test_size = 0.2
             random_state = 42
             datasets = {144: "german", 2: "adult"}
 
@@ -81,7 +80,7 @@ class EvaluationService:
             }
 
             dataset_names = [d.value for d in dataset_list]
-            classifier_names = [c.value for c in classifier_list]
+            classifier_names = [getattr(c, 'name', getattr(c, 'value', str(c))) for c in classifier_list]
             method_names = [m.value for m in method_list]
 
             # Filter datasets, classifiers, and methods
@@ -96,7 +95,7 @@ class EvaluationService:
                 for method_name in methods.keys():
                     for model_name in classifiers.keys():
                         # Cache'den kontrol et
-                        cached_result = self._get_cached_result(dataset_name, model_name, method_name)
+                        cached_result = self._get_cached_result(dataset_name, model_name, method_name, test_size)
                         if cached_result:
                             logging.info(f"Cache hit for {dataset_name}-{model_name}-{method_name}")
                             final_metrics.extend(cached_result)
@@ -199,7 +198,7 @@ class EvaluationService:
                             combination_results.append(result)
 
                         # Bu kombinasyonun sonuçlarını cache'e kaydet
-                        self._set_cached_result(dataset_name, model_name, method_name, combination_results)
+                        self._set_cached_result(dataset_name, model_name, method_name, test_size, combination_results)
                         
                         # Final metrics'e ekle
                         final_metrics.extend(combination_results)
